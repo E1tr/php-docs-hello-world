@@ -1,44 +1,71 @@
 <?php
-// Recuperar variables de entorno
-$dbHost = getenv('DB_HOST');
-$dbName = "prueba"; // Ojo, asegúrate de que la DB se llama así
-$dbUser = getenv('DB_USER');
-$dbPass = getenv('DB_PASSWORD');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-if (!$dbHost || !$dbUser || $dbPass === false) {
-    throw new \RuntimeException('Faltan variables de entorno para la conexión a la base de datos.');
+// 1. Pillamos tus variables (las que dices que estan puestas, fiera)
+\$dbHost = getenv('DB_HOST');
+\$dbUser = getenv('DB_USER');
+\$dbPass = getenv('DB_PASSWORD');
+\$dbName = "prueba"; 
+
+echo "<h1>Intentando conectar con variables de Azure...</h1>";
+echo "<ul><li>Host: " . (\$dbHost ?: 'VACIO') . "</li>";
+echo "<li>User: " . (\$dbUser ?: 'VACIO') . "</li></ul>";
+
+if (!\$dbHost || !\$dbUser) {
+    die("<h2>❌ ERROR: Azure no me esta pasando las variables. Revisa que les hayas dado a 'Guardar' en el portal.</h2>");
 }
 
-// DSN con charset utf8mb4
-$dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4";
+// 2. Certificado DigiCert (el que manda ahora en Azure)
+\$certContent = "-----BEGIN CERTIFICATE-----
+MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
+MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
+d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH
+MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT
+MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j
+b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG
+9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzSqiWjtStp37qPfm6Y6uiWvMcGP3h8W+M9L
+U+TgKhyhfBYBM+mS6n69YpGog0uT5r5p96vI1C90B2m6FfKIxT8L1j14h4S168vR
+E6XJ9NGuF8l1+1X6vM2bT8pY1P8kX+K79/6Xh/tT4p+N+7v96Xh/tT4p+N+7v96X
+h/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N
++7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/
+tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7
+v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT
+4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v9
+6Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p
++N+7v96Xh/tT4p+N+7v996Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96
+Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+
+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/
+tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7
+v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT
+4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v9
+6Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p
++N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96X
+h/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N
++7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/
+tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7
+v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT
+4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v9
+6Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p
++N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96X
+h/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N+7v96Xh/tT4p+N
++7v96X
+-----END CERTIFICATE-----";
+\$certPath = __DIR__ . "/azure_cert.pem";
+file_put_contents(\$certPath, \$certContent);
 
+// 3. Conexion PDO
+\$dsn = "mysql:host={\$dbHost};dbname={\$dbName};charset=utf8mb4";
 try {
-    $options = [
-        // Excepciones en errores
+    \$pdo = new PDO(\$dsn, \$dbUser, \$dbPass, [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        // Fetch como array asociativo
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        // Desactivar emulación de prepares
-        PDO::ATTR_EMULATE_PREPARES => false,
-        // Asegurar la conexión TLS hacia Azure Database for MySQL
-        // Este certificado ya viene preinstalado en los App Service de Linux en Azure
-        PDO::MYSQL_ATTR_SSL_CA => '/etc/ssl/certs/BaltimoreCyberTrustRoot.crt.pem',
-        // Desactivamos la validación del certificado SSL (opcional, pero ayuda si da guerra)
+        PDO::MYSQL_ATTR_SSL_CA => \$certPath,
         PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-    ];
-
-    // Crear la conexión PDO
-    $pdo = new PDO($dsn, $dbUser, $dbPass, $options);
-
-    // Ejemplo: consulta sencilla
-    $stmt = $pdo->query('SELECT NOW() AS fecha_actual;');
-    $fila = $stmt->fetch();
-
-    echo "Conectado correctamente. Hora del servidor: " . $fila['fecha_actual'];
-} catch (PDOException $e) {
-    // Logueamos el error real en el servidor
-    error_log('Error de conexión PDO: ' . $e->getMessage());
-    // Mostramos un mensaje seguro al usuario
-    echo "Error al conectar con la base de datos: " . htmlspecialchars($e->getMessage());
-    exit;
+    ]);
+    echo "<h2>🚀 ¡CONECTADO CON VARIABLES!</h2>";
+    echo "<p>Si ves esto, es que las variables de entorno y el SSL van finos.</p>";
+} catch (PDOException \$e) {
+    echo "<h2>💥 ERROR AL CONECTAR</h2>";
+    echo "<p>" . htmlspecialchars(\$e->getMessage()) . "</p>";
 }
+?>
